@@ -19,9 +19,11 @@ from combustion.air_preheater import (
 )
 
 from comparison import (
-    methane_with_preheated_air,
+    solve_preheated_case,
     print_comparison,
 )
+
+import comparison
 
 def main():
 
@@ -43,13 +45,16 @@ def main():
 
     print_air_preheater(preheater)
 
-    comparison = methane_with_preheated_air(
+    comparison = solve_preheated_case(
     energy["thermal_power_kw"],
-    mass["air"])
+    methane
+)
 
     print_comparison(
     methane,
-    comparison)
+    comparison
+)
+    
 
 if __name__ == "__main__":
     main() 

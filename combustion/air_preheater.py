@@ -32,15 +32,10 @@ def calculate_air_preheater(air_flow_kg_h):
     )
 
     return {
-
         "air_flow": air_flow_kg_h,
-
         "thermal_power": thermal_power_kw,
-
         "electric_power": electric_power_kw,
-
         "delta_t": delta_t
-
     }
 
 
