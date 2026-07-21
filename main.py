@@ -24,6 +24,8 @@ from comparison import (
 )
 
 import comparison
+import config
+
 
 def main():
 
@@ -41,13 +43,17 @@ def main():
     
     print_mass_balance(mass)
 
-    preheater = calculate_air_preheater(mass["air"])
+    preheater = calculate_air_preheater(
+    mass["air"],
+    config.AIR_TEMPERATURE_PREHEATED,
+)
 
     print_air_preheater(preheater)
 
     comparison = solve_preheated_case(
     energy["thermal_power_kw"],
-    methane
+    methane,
+    config.AIR_TEMPERATURE_PREHEATED,
 )
 
     print_comparison(

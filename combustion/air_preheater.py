@@ -11,14 +11,17 @@ the combustion air.
 import config
 
 
-def calculate_air_preheater(air_flow_kg_h):
+def calculate_air_preheater(
+    air_flow_kg_h,
+    outlet_temperature,
+):
 
     air_flow_kg_s = air_flow_kg_h / 3600
 
     delta_t = (
-        config.AIR_TEMPERATURE_PREHEATED
-        - config.AIR_TEMPERATURE_STANDARD
-    )
+    outlet_temperature
+    - config.AIR_TEMPERATURE_STANDARD
+)
 
     thermal_power_kw = (
         air_flow_kg_s

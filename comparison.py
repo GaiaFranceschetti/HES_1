@@ -3,6 +3,7 @@
 CASE COMPARISON
 =========================================================
 """
+import config
 
 from solver import solve_operating_point
 
@@ -10,10 +11,14 @@ from solver import solve_operating_point
 def solve_preheated_case(
     thermal_power_kw,
     methane_initial,
+    outlet_temperature,
 ):
+
     return solve_operating_point(
         thermal_power_kw,
         methane_initial,
+        outlet_temperature,
+        verbose=False,
     )
 
 
