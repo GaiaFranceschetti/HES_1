@@ -105,3 +105,29 @@ AIR_TEMPERATURE_STANDARD = 250.0   # °C
 AIR_TEMPERATURE_PREHEATED = 450.0  # °C
 
 INDUCTION_EFFICIENCY = 0.95
+
+# ==========================================================
+# ECONOMIC PARAMETERS
+# ==========================================================
+
+# Lower Heating Value of methane
+METHANE_LHV_KWH_PER_KG = 13.89
+
+# Natural gas price
+GAS_PRICE_EUR_PER_MWH = 45.0
+
+MIN_PREHEAT_TEMPERATURE = 250
+MAX_PREHEAT_TEMPERATURE = 450
+PREHEAT_TEMPERATURE_STEP = 10
+
+# =========================================================
+# ENVIRONMENTAL PARAMETERS
+# =========================================================
+
+CO2_EMISSION_FACTOR = 2.75   # kg CO2 / kg CH4
+
+# =========================================================
+# CARBON TAX
+# =========================================================
+
+CARBON_PRICE_EUR_PER_TON = 100
