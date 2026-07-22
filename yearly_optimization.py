@@ -8,9 +8,13 @@ using hourly electricity prices.
 """
 
 import pandas as pd
+import config
 
+from economics.emissions import methane_to_co2
 from economics.prices import ElectricityPrices
 from optimization import find_best_temperature
+
+
 
 
 def main():
@@ -37,10 +41,11 @@ def main():
         electricity_price = prices.get_price(hour)
 
         best = find_best_temperature(
-            thermal_power_kw,
-            methane_initial,
-            electricity_price,
-        )
+        thermal_power_kw,
+        methane_initial,
+        electricity_price,
+        config.CARBON_PRICE_EUR_PER_TON,
+)
 
         results.append(
             {
@@ -53,6 +58,7 @@ def main():
                 "gas_cost": best["gas_cost"],
                 "electricity_cost": best["electricity_cost"],
                 "total_cost": best["cost"],
+                "co2_emissions": methane_to_co2(best["methane"]),
             }
         )
 

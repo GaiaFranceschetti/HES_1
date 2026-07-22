@@ -38,6 +38,14 @@ def main():
 
     print()
 
+        # CO2 emissions
+    co2 = df["co2_emissions"].sum()
+
+    print()
+
+    print("Total CO2 emissions:")
+    print(f"{co2/1000:.2f} ton/year")
+
     # Electricity consumption
     electricity = df["electric_power"].sum()
 
@@ -46,7 +54,7 @@ def main():
 
     print()
 
-    # Average temperature
+    # Average optimal temperature
     avg_temperature = df["temperature"].mean()
 
     print("Average optimal temperature:")
@@ -56,10 +64,25 @@ def main():
 
     # Temperature distribution
     print("Temperature distribution:")
+
     print(
         df["temperature"]
         .value_counts()
         .sort_index()
+    )
+
+    print()
+
+    # Electricity price when preheater is active
+    print("Electricity price when preheater is ON:")
+
+    active_hours = df[
+        df["temperature"] == 450
+    ]
+
+    print(
+        active_hours["electricity_price"]
+        .describe()
     )
 
 

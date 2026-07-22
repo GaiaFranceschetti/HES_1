@@ -13,6 +13,7 @@ import pandas as pd
 from economics.prices import ElectricityPrices
 from combustion.fuel_consumption import methane_consumption
 from economics.costs import gas_cost
+from economics.emissions import methane_to_co2
 
 
 def main():
@@ -46,6 +47,7 @@ def main():
                 "gas_cost": cost,
                 "electricity_cost": 0,
                 "total_cost": cost,
+                "co2_emissions": methane_to_co2(methane),
             }
         )
 
@@ -71,6 +73,11 @@ def main():
     print(
         f"Methane consumption: "
         f"{df['methane'].sum()/1000:.2f} ton/year"
+    )
+
+    print(
+        f"CO2 emissions: "
+        f"{df['co2_emissions'].sum()/1000:.2f} ton/year"
     )
 
 

@@ -6,7 +6,9 @@ OPTIMIZATION
 Evaluate the operating cost of the hybrid boiler for a
 given outlet air temperature.
 """
+
 import config
+
 from comparison import solve_preheated_case
 
 from economics.costs import (
@@ -21,6 +23,7 @@ def evaluate_temperature(
     methane_initial,
     outlet_temperature,
     electricity_price,
+    carbon_price=0,
 ):
     """
     Evaluate one operating point.
@@ -34,7 +37,10 @@ def evaluate_temperature(
     )
 
     methane = result["methane"]
-    electric_power = result["preheater"]["electric_power"]
+
+    electric_power = (
+        result["preheater"]["electric_power"]
+    )
 
     gas = gas_cost(methane)
 
@@ -47,6 +53,7 @@ def evaluate_temperature(
         methane,
         electric_power,
         electricity_price,
+        carbon_price,
     )
 
     return {
@@ -60,10 +67,12 @@ def evaluate_temperature(
     }
 
 
+
 def find_best_temperature(
     thermal_power_kw,
     methane_initial,
     electricity_price,
+    carbon_price=0,
 ):
     """
     Find the outlet air temperature that minimizes
@@ -84,13 +93,16 @@ def find_best_temperature(
             methane_initial,
             temperature,
             electricity_price,
+            carbon_price,
         )
 
         if result["cost"] < best_cost:
+
             best_cost = result["cost"]
             best_result = result
 
     return best_result
+
 
 
 if __name__ == "__main__":
@@ -99,6 +111,7 @@ if __name__ == "__main__":
         thermal_power_kw=5233.3,
         methane_initial=409.57,
         electricity_price=10,
+        carbon_price=config.CARBON_PRICE_EUR_PER_TON,
     )
 
     print()

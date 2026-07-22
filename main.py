@@ -1,4 +1,25 @@
+"""
+=========================================================
+MAIN - HYBRID BOILER SINGLE OPERATING POINT
+
+Verification of the physical model:
+- combustion configuration
+- stoichiometry
+- energy balance
+- fuel consumption
+- mass balance
+- electric preheating
+- comparison gas vs hybrid case
+
+=========================================================
+"""
+
+
+import config
+
+
 from combustion.combustion_model import print_configuration
+
 from combustion.stoichiometry import print_stoichiometry
 
 from combustion.energy_balance import (
@@ -6,7 +27,9 @@ from combustion.energy_balance import (
     print_energy_balance,
 )
 
-from combustion.fuel_consumption import methane_consumption
+from combustion.fuel_consumption import (
+    methane_consumption,
+)
 
 from combustion.mass_balance import (
     calculate_mass_balance,
@@ -23,44 +46,90 @@ from comparison import (
     print_comparison,
 )
 
-import comparison
-import config
 
 
 def main():
 
+    print()
+    print("========================================")
+    print("HYBRID BOILER SINGLE POINT MODEL")
+    print("========================================")
+
+
+    # -----------------------------------------------------
+    # Physical configuration
+    # -----------------------------------------------------
+
     print_configuration()
+
+
+    # -----------------------------------------------------
+    # Combustion stoichiometry
+    # -----------------------------------------------------
 
     print_stoichiometry()
 
+
+    # -----------------------------------------------------
+    # Thermal power calculation
+    # -----------------------------------------------------
+
     energy = calculate_thermal_power()
 
-    print_energy_balance(energy)
+    print_energy_balance(
+        energy
+    )
 
-    methane =  methane_consumption(energy["thermal_power_kw"])
 
-    mass = calculate_mass_balance(methane)
-    
-    print_mass_balance(mass)
+    # -----------------------------------------------------
+    # Conventional boiler
+    # -----------------------------------------------------
+
+    methane = methane_consumption(
+        energy["thermal_power_kw"]
+    )
+
+
+    mass = calculate_mass_balance(
+        methane
+    )
+
+    print_mass_balance(
+        mass
+    )
+
+
+    # -----------------------------------------------------
+    # Electric air preheater
+    # -----------------------------------------------------
 
     preheater = calculate_air_preheater(
-    mass["air"],
-    config.AIR_TEMPERATURE_PREHEATED,
-)
+        mass["air"],
+        config.AIR_TEMPERATURE_PREHEATED,
+    )
 
-    print_air_preheater(preheater)
+    print_air_preheater(
+        preheater
+    )
+
+
+    # -----------------------------------------------------
+    # Hybrid boiler comparison
+    # -----------------------------------------------------
 
     comparison = solve_preheated_case(
-    energy["thermal_power_kw"],
-    methane,
-    config.AIR_TEMPERATURE_PREHEATED,
-)
+        energy["thermal_power_kw"],
+        methane,
+        config.AIR_TEMPERATURE_PREHEATED,
+    )
+
 
     print_comparison(
-    methane,
-    comparison
-)
-    
+        methane,
+        comparison,
+    )
+
+
 
 if __name__ == "__main__":
-    main() 
+    main()
