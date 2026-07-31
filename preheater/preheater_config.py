@@ -141,3 +141,19 @@ FAN_EFFICIENCY = 0.75
 TUBE_THICKNESS = 0.003          # m
 
 DEFAULT_MATERIAL = "AISI310"
+
+# ----------------------------------------------------------
+# Ambient conditions
+# ----------------------------------------------------------
+
+AMBIENT_TEMPERATURE = 25          # °C
+
+EXTERNAL_CONVECTION_COEFFICIENT = 8.0   # W/m²K
+
+# ----------------------------------------------------------
+# Thermal insulation
+# ----------------------------------------------------------
+
+DEFAULT_INSULATION = "RockWool"
+
+INSULATION_THICKNESS = 0.05      # m (5 cm)
