@@ -1,6 +1,9 @@
 from combustion.mass_balance import calculate_mass_balance
 from combustion.fuel_consumption import methane_consumption
 
+from economics.emissions import methane_to_co2
+from economics.costs import total_cost
+
 from preheater.design import design_preheater
 
 
@@ -8,21 +11,23 @@ def solve_operating_point(
     thermal_power_kw,
     methane_initial,
     outlet_temperature,
+    electricity_price,
+    carbon_price=0,
     tolerance=0.01,
     max_iterations=20,
     verbose=True,
 ):
     """
-    Solve the coupled system:
+    Solve the coupled hybrid boiler model.
 
-        CH4
-          ↓
+    CH4
+      ↓
     Mass balance
-          ↓
+      ↓
     Air preheater design
-          ↓
-    Updated methane
-          ↓
+      ↓
+    Updated methane consumption
+      ↓
     Repeat until convergence
     """
 
@@ -36,11 +41,10 @@ def solve_operating_point(
 
         mass = calculate_mass_balance(methane)
 
-        # Convert air flow from kg/h to kg/s
         air_mass_flow = mass["air"] / 3600
 
         # --------------------------------------------------
-        # Detailed preheater design
+        # Air preheater
         # --------------------------------------------------
 
         preheater = design_preheater(
@@ -48,9 +52,7 @@ def solve_operating_point(
             outlet_temperature=outlet_temperature,
         )
 
-        # Useful quantities
         thermal_power_to_air = preheater["thermal_power_kw"]
-        electric_power = preheater["total_electric_power_kw"]
 
         # --------------------------------------------------
         # Fuel consumption
@@ -63,6 +65,25 @@ def solve_operating_point(
         )
 
         methane_new = fuel["methane_kg_h"]
+
+        # --------------------------------------------------
+        # Emissions
+        # --------------------------------------------------
+
+        emissions = methane_to_co2(
+            methane_new
+        )
+
+        # --------------------------------------------------
+        # Economics
+        # --------------------------------------------------
+
+        economics = total_cost(
+            methane_kg_h=methane_new,
+            electric_power_kw=preheater["total_electric_power_kw"],
+            electricity_price=electricity_price,
+            carbon_price=carbon_price,
+        )
 
         # --------------------------------------------------
         # Convergence
@@ -78,12 +99,23 @@ def solve_operating_point(
             )
 
         if error < tolerance:
+
             return {
+
                 "methane": methane_new,
+
                 "fuel": fuel,
+
                 "mass": mass,
+
                 "preheater": preheater,
+
+                "emissions": emissions,
+
+                "economics": economics,
+
                 "iterations": iteration + 1,
+
             }
 
         methane = methane_new
@@ -92,9 +124,19 @@ def solve_operating_point(
         print("\nWARNING: Maximum number of iterations reached.")
 
     return {
+
         "methane": methane,
+
         "fuel": fuel,
+
         "mass": mass,
+
         "preheater": preheater,
+
+        "emissions": emissions,
+
+        "economics": economics,
+
         "iterations": max_iterations,
+
     }

@@ -30,6 +30,7 @@ from combustion.mass_balance import (
     print_mass_balance,
 )
 
+import preheater
 from preheater.design import design_preheater
 
 from comparison import (
@@ -103,6 +104,9 @@ def main():
     print(f"Wall temperature       : {preheater['wall_temperature']:.1f} °C")
     print(f"Pressure drop          : {preheater['pressure_drop_pa']:.1f} Pa")
     print(f"Material OK            : {preheater['material_ok']}")
+    print(f"Radiation losses     : {preheater['radiation_losses_kw']:.2f} kW")
+    print(f"Convection losses    : {preheater['convection_losses_kw']:.2f} kW")
+    print(f"Total losses         : {preheater['total_losses_kw']:.2f} kW")
 
     # --------------------------------------------------
     # Hybrid operating point
