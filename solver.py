@@ -1,6 +1,7 @@
 from combustion.mass_balance import calculate_mass_balance
-from combustion.air_preheater import calculate_air_preheater
 from combustion.fuel_consumption import methane_consumption
+
+from preheater.design import design_preheater
 
 
 def solve_operating_point(
@@ -14,32 +15,59 @@ def solve_operating_point(
     """
     Solve the coupled system:
 
-    CH4 --> Air --> Air Preheater --> New CH4
-
-    until convergence.
+        CH4
+          ↓
+    Mass balance
+          ↓
+    Air preheater design
+          ↓
+    Updated methane
+          ↓
+    Repeat until convergence
     """
 
     methane = methane_initial
 
     for iteration in range(max_iterations):
 
+        # --------------------------------------------------
         # Mass balance
+        # --------------------------------------------------
+
         mass = calculate_mass_balance(methane)
 
-        # Air preheater
-        preheater = calculate_air_preheater(
-            mass["air"],
-            outlet_temperature,
+        # Convert air flow from kg/h to kg/s
+        air_mass_flow = mass["air"] / 3600
+
+        # --------------------------------------------------
+        # Detailed preheater design
+        # --------------------------------------------------
+
+        preheater = design_preheater(
+            air_mass_flow=air_mass_flow,
+            outlet_temperature=outlet_temperature,
         )
 
-        # New methane consumption
-        methane_new = methane_consumption(
-            thermal_power_kw,
-            preheater["thermal_power"],
+        # Useful quantities
+        thermal_power_to_air = preheater["thermal_power_kw"]
+        electric_power = preheater["total_electric_power_kw"]
+
+        # --------------------------------------------------
+        # Fuel consumption
+        # --------------------------------------------------
+
+        fuel = methane_consumption(
+            thermal_power_kw=thermal_power_kw,
+            thermal_power_to_air_kw=thermal_power_to_air,
             verbose=verbose,
         )
 
-        # Convergence error
+        methane_new = fuel["methane_kg_h"]
+
+        # --------------------------------------------------
+        # Convergence
+        # --------------------------------------------------
+
         error = abs(methane_new - methane)
 
         if verbose:
@@ -49,23 +77,23 @@ def solve_operating_point(
                 f" | Error = {error:.4f}"
             )
 
-        # Check convergence
         if error < tolerance:
             return {
                 "methane": methane_new,
+                "fuel": fuel,
                 "mass": mass,
                 "preheater": preheater,
                 "iterations": iteration + 1,
             }
 
-        # Update methane for next iteration
         methane = methane_new
 
     if verbose:
-        print("\nWARNING: maximum number of iterations reached.")
+        print("\nWARNING: Maximum number of iterations reached.")
 
     return {
         "methane": methane,
+        "fuel": fuel,
         "mass": mass,
         "preheater": preheater,
         "iterations": max_iterations,

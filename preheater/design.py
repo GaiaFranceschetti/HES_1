@@ -1,17 +1,17 @@
 import math
 
-from materials import MATERIALS
+from .materials import MATERIALS
 
-from insulation import INSULATIONS
+from .insulation import INSULATIONS
 
-from air_properties import (
+from .air_properties import (
     air_cp,
     air_conductivity,
     air_viscosity,
-    air_prandtl
+    air_prandtl,
 )
 
-from preheater_config import (
+from .preheater_config import (
     AIR_INLET_TEMPERATURE,
     INDUCTION_EFFICIENCY,
     AMBIENT_PRESSURE,
@@ -21,9 +21,8 @@ from preheater_config import (
     DEFAULT_MATERIAL,
     AMBIENT_TEMPERATURE,
     EXTERNAL_CONVECTION_COEFFICIENT,
-    INSULATION_THICKNESS
+    INSULATION_THICKNESS,
 )
-
 
 def design_preheater(
     air_mass_flow,
