@@ -128,6 +128,32 @@ CO2_EMISSION_FACTOR = 2.744        # kg CO2 / kg CH4
 
 NATURAL_GAS_PRICE = 45.0           # €/MWh
 
-DEFAULT_ELECTRICITY_PRICE = 100.0  # €/MWh
+DEFAULT_ELECTRICITY_PRICE = 100 # €/MWh
 
 CARBON_TAX = 80.0                  # €/tCO2
+
+# ==========================================================
+# OPTIMIZATION SETTINGS
+# ==========================================================
+
+MIN_PREHEAT_TEMPERATURE = 250      # °C
+MAX_PREHEAT_TEMPERATURE = 600      # °C
+PREHEAT_TEMPERATURE_STEP = 25      # °C
+
+# ==========================================================
+# COMBUSTION IMPROVEMENT
+# ==========================================================
+
+REFERENCE_AIR_TEMPERATURE = 250      # °C
+
+EFFICIENCY_GAIN_PER_100C = 0.01
+
+# ==========================================================
+# PREHEATING EFFECTIVENESS
+# ==========================================================
+
+REFERENCE_AIR_TEMPERATURE = 250      # °C
+
+MAX_PREHEATING_EFFECTIVENESS = 0.90
+
+PREHEATING_CHARACTERISTIC_TEMPERATURE = 120      # °C

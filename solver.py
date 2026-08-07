@@ -1,4 +1,8 @@
-from combustion.mass_balance import calculate_mass_balance
+from combustion.mass_balance import (
+    calculate_mass_balance,
+    print_mass_balance,
+)
+
 from combustion.fuel_consumption import methane_consumption
 
 from economics.emissions import methane_to_co2
@@ -18,17 +22,7 @@ def solve_operating_point(
     verbose=True,
 ):
     """
-    Solve the coupled hybrid boiler model.
-
-    CH4
-      ↓
-    Mass balance
-      ↓
-    Air preheater design
-      ↓
-    Updated methane consumption
-      ↓
-    Repeat until convergence
+    Solve one operating point of the hybrid boiler.
     """
 
     methane = methane_initial
@@ -41,6 +35,9 @@ def solve_operating_point(
 
         mass = calculate_mass_balance(methane)
 
+        if verbose:
+            print_mass_balance(mass)
+
         air_mass_flow = mass["air"] / 3600
 
         # --------------------------------------------------
@@ -52,7 +49,25 @@ def solve_operating_point(
             outlet_temperature=outlet_temperature,
         )
 
-        thermal_power_to_air = preheater["thermal_power_kw"]
+        if verbose:
+
+            print()
+            print("========================================")
+            print("PREHEATER DESIGN")
+            print("========================================")
+
+            print(f"Air mass flow          : {preheater['air_mass_flow']:.3f} kg/s")
+            print(f"Outlet temperature     : {preheater['outlet_temperature']:.1f} °C")
+            print(f"Thermal power to air   : {preheater['thermal_power_kw']:.1f} kW")
+            print(f"Induction power        : {preheater['electric_power_kw']:.1f} kW")
+            print(f"Fan power              : {preheater['fan_power_kw']:.2f} kW")
+            print(f"Total electric power   : {preheater['total_electric_power_kw']:.1f} kW")
+            print(f"Wall temperature       : {preheater['wall_temperature']:.1f} °C")
+            print(f"Pressure drop          : {preheater['pressure_drop_pa']:.1f} Pa")
+            print(f"Material OK            : {preheater['material_ok']}")
+            print(f"Radiation losses       : {preheater['radiation_losses_kw']:.2f} kW")
+            print(f"Convection losses      : {preheater['convection_losses_kw']:.2f} kW")
+            print(f"Total losses           : {preheater['total_losses_kw']:.2f} kW")
 
         # --------------------------------------------------
         # Fuel consumption
@@ -60,7 +75,8 @@ def solve_operating_point(
 
         fuel = methane_consumption(
             thermal_power_kw=thermal_power_kw,
-            thermal_power_to_air_kw=thermal_power_to_air,
+            thermal_power_to_air_kw=preheater["thermal_power_kw"],
+            air_temperature=outlet_temperature,
             verbose=verbose,
         )
 
@@ -70,9 +86,7 @@ def solve_operating_point(
         # Emissions
         # --------------------------------------------------
 
-        emissions = methane_to_co2(
-            methane_new
-        )
+        emissions = methane_to_co2(methane_new)
 
         # --------------------------------------------------
         # Economics
@@ -84,6 +98,18 @@ def solve_operating_point(
             electricity_price=electricity_price,
             carbon_price=carbon_price,
         )
+
+        if verbose:
+
+            print()
+            print("========================================")
+            print("ECONOMICS")
+            print("========================================")
+
+            print(f"Gas cost              : {economics['gas_cost']:.2f} €/h")
+            print(f"Electricity cost      : {economics['electricity_cost']:.2f} €/h")
+            print(f"Carbon cost           : {economics['carbon_cost']:.2f} €/h")
+            print(f"Total operating cost  : {economics['total_cost']:.2f} €/h")
 
         # --------------------------------------------------
         # Convergence
@@ -100,32 +126,18 @@ def solve_operating_point(
 
         if error < tolerance:
 
-            return {
-
-                "methane": methane_new,
-
-                "fuel": fuel,
-
-                "mass": mass,
-
-                "preheater": preheater,
-
-                "emissions": emissions,
-
-                "economics": economics,
-
-                "iterations": iteration + 1,
-
-            }
+            break
 
         methane = methane_new
 
-    if verbose:
-        print("\nWARNING: Maximum number of iterations reached.")
+    else:
+
+        if verbose:
+            print("\nWARNING: Maximum number of iterations reached.")
 
     return {
 
-        "methane": methane,
+        "methane": methane_new,
 
         "fuel": fuel,
 
@@ -137,6 +149,6 @@ def solve_operating_point(
 
         "economics": economics,
 
-        "iterations": max_iterations,
+        "iterations": iteration + 1,
 
     }
