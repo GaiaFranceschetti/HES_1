@@ -12,10 +12,14 @@ import config
 
 def methane_energy(methane_kg_h):
     """
-    Convert methane mass flow [kg/h] into energy [MWh/h].
+    Convert methane consumption [kg/h]
+    into thermal energy [MWh/h].
     """
 
-    return methane_kg_h * config.METHANE_LHV_KWH_PER_KG / 1000
+    # LHV_METHANE è in kJ/kg
+    energy_kwh_h = methane_kg_h * config.LHV_METHANE / 3600
+
+    return energy_kwh_h / 1000
 
 
 
@@ -26,7 +30,7 @@ def gas_cost(methane_kg_h):
 
     energy = methane_energy(methane_kg_h)
 
-    return energy * config.GAS_PRICE_EUR_PER_MWH
+    return energy * config.NATURAL_GAS_PRICE
 
 
 
@@ -64,37 +68,48 @@ def carbon_cost(co2_kg, carbon_price):
     return co2_ton * carbon_price
 
 
-
 def total_cost(
     methane_kg_h,
     electric_power_kw,
     electricity_price,
     carbon_price=0,
 ):
-    """
-    Calculate total hourly operating cost [€/h].
 
-    Includes:
-    - natural gas cost
-    - electricity cost
-    - carbon tax
-    """
+    gas = gas_cost(
+        methane_kg_h
+    )
+
+    electricity = electricity_cost(
+        electric_power_kw,
+        electricity_price,
+    )
 
     co2_kg = (
         methane_kg_h
         * config.CO2_EMISSION_FACTOR
     )
 
-    return (
-        gas_cost(methane_kg_h)
-        +
-        electricity_cost(
-            electric_power_kw,
-            electricity_price,
-        )
-        +
-        carbon_cost(
-            co2_kg,
-            carbon_price,
-        )
+    carbon = carbon_cost(
+        co2_kg,
+        carbon_price,
     )
+
+    total = (
+        gas
+        + electricity
+        + carbon
+    )
+
+    return {
+
+        "gas_cost": gas,
+
+        "electricity_cost": electricity,
+
+        "carbon_cost": carbon,
+
+        "total_cost": total,
+
+        "co2_kg_h": co2_kg,
+
+    }

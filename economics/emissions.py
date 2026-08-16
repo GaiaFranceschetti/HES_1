@@ -9,19 +9,24 @@ CO2 emissions calculation from methane consumption.
 import config
 
 
-def methane_to_co2(methane_kg):
+def methane_to_co2(methane_kg_h):
     """
-    Calculate CO2 emissions from methane consumption.
+    Calculate CO2 emissions.
 
     Parameters
     ----------
-    methane_kg : float
-        Methane consumption [kg]
+    methane_kg_h : float
+        Methane consumption [kg/h]
 
     Returns
     -------
-    float
-        CO2 emissions [kg]
+    dict
+        CO2 emissions.
     """
 
-    return methane_kg * config.CO2_EMISSION_FACTOR
+    co2_kg_h = methane_kg_h * config.CO2_EMISSION_FACTOR
+
+    return {
+        "methane_kg_h": methane_kg_h,
+        "co2_kg_h": co2_kg_h,
+    }

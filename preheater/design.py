@@ -1,17 +1,17 @@
 import math
 
-from materials import MATERIALS
+from .materials import MATERIALS
 
-from insulation import INSULATIONS
+from .insulation import INSULATIONS
 
-from air_properties import (
+from .air_properties import (
     air_cp,
     air_conductivity,
     air_viscosity,
-    air_prandtl
+    air_prandtl,
 )
 
-from preheater_config import (
+from .preheater_config import (
     AIR_INLET_TEMPERATURE,
     INDUCTION_EFFICIENCY,
     AMBIENT_PRESSURE,
@@ -21,9 +21,8 @@ from preheater_config import (
     DEFAULT_MATERIAL,
     AMBIENT_TEMPERATURE,
     EXTERNAL_CONVECTION_COEFFICIENT,
-    INSULATION_THICKNESS
+    INSULATION_THICKNESS,
 )
-
 
 def design_preheater(
     air_mass_flow,
@@ -331,43 +330,29 @@ def design_preheater(
        wall_temperature
        <= max_temperature - SAFETY_MARGIN
     )
- 
-    # ----------------------------------------------------------
-    # Radiation heat losses
-    # ----------------------------------------------------------
 
-    STEFAN_BOLTZMANN = 5.670374419e-8
+    # ==========================================================
+    # PREHEATER THERMAL LOSSES
+    # ==========================================================
 
-    wall_temperature_K = wall_temperature + 273.15
-
-    ambient_temperature_K = AIR_INLET_TEMPERATURE + 273.15
-
-    radiation_losses_kw = (
-        emissivity
-        * STEFAN_BOLTZMANN
-        * external_surface
-        * (
-           wall_temperature_K**4
-           - ambient_temperature_K**4
-        )
-    ) / 1000
+    PREHEATER_HEAT_LOSS_FACTOR = 0.05      # 5 %
 
     # ----------------------------------------------------------
-    # External convection losses
+    # Global thermal losses
     # ----------------------------------------------------------
-
-    convection_losses_kw = (
-       EXTERNAL_CONVECTION_COEFFICIENT
-       * external_surface
-       * (
-          outer_wall_temperature
-          - AMBIENT_TEMPERATURE
-       )
-    ) / 1000
 
     total_losses_kw = (
-    radiation_losses_kw
-    + convection_losses_kw
+        thermal_power_kw
+        * PREHEATER_HEAT_LOSS_FACTOR
+    )
+
+    # Split only for reporting
+    radiation_losses_kw = (
+        total_losses_kw * 0.7
+    )
+
+    convection_losses_kw = (
+        total_losses_kw * 0.3
     )
 
     # ----------------------------------------------------------
@@ -438,8 +423,6 @@ def design_preheater(
 
         "material": material,
 
-        "material": material,
-
         "tube_thickness": TUBE_THICKNESS,
 
         "outer_diameter": outer_diameter,
@@ -455,8 +438,6 @@ def design_preheater(
         "emissivity": emissivity,
 
         "delta_T": delta_T,
-
-        "outlet_temperature": outlet_temperature,
 
         "outlet_temperature": outlet_temperature,
 

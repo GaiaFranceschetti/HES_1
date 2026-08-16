@@ -1,25 +1,12 @@
 """
 =========================================================
 MAIN - HYBRID BOILER SINGLE OPERATING POINT
-
-Verification of the physical model:
-- combustion configuration
-- stoichiometry
-- energy balance
-- fuel consumption
-- mass balance
-- electric preheating
-- comparison gas vs hybrid case
-
 =========================================================
 """
 
-
 import config
 
-
 from combustion.combustion_model import print_configuration
-
 from combustion.stoichiometry import print_stoichiometry
 
 from combustion.energy_balance import (
@@ -27,25 +14,10 @@ from combustion.energy_balance import (
     print_energy_balance,
 )
 
-from combustion.fuel_consumption import (
-    methane_consumption,
-)
-
-from combustion.mass_balance import (
-    calculate_mass_balance,
-    print_mass_balance,
-)
-
-from combustion.air_preheater import (
-    calculate_air_preheater,
-    print_air_preheater,
-)
-
 from comparison import (
     solve_preheated_case,
     print_comparison,
 )
-
 
 
 def main():
@@ -55,81 +27,62 @@ def main():
     print("HYBRID BOILER SINGLE POINT MODEL")
     print("========================================")
 
-
-    # -----------------------------------------------------
-    # Physical configuration
-    # -----------------------------------------------------
+    # --------------------------------------------------
+    # Configuration
+    # --------------------------------------------------
 
     print_configuration()
 
-
-    # -----------------------------------------------------
-    # Combustion stoichiometry
-    # -----------------------------------------------------
+    # --------------------------------------------------
+    # Stoichiometry
+    # --------------------------------------------------
 
     print_stoichiometry()
 
-
-    # -----------------------------------------------------
-    # Thermal power calculation
-    # -----------------------------------------------------
+    # --------------------------------------------------
+    # Steam thermal power
+    # --------------------------------------------------
 
     energy = calculate_thermal_power()
 
-    print_energy_balance(
-        energy
-    )
+    print_energy_balance(energy)
 
+    # --------------------------------------------------
+    # Initial methane guess
+    # --------------------------------------------------
 
-    # -----------------------------------------------------
+    methane_initial = 410.0
+
+    # --------------------------------------------------
     # Conventional boiler
-    # -----------------------------------------------------
+    # --------------------------------------------------
 
-    methane = methane_consumption(
-        energy["thermal_power_kw"]
+    reference = solve_preheated_case(
+        thermal_power_kw=energy["thermal_power_kw"],
+        methane_initial=methane_initial,
+        outlet_temperature=config.AIR_TEMPERATURE_STANDARD,
     )
 
+    # --------------------------------------------------
+    # Hybrid boiler
+    # --------------------------------------------------
 
-    mass = calculate_mass_balance(
-        methane
+    hybrid = solve_preheated_case(
+        thermal_power_kw=energy["thermal_power_kw"],
+        methane_initial=methane_initial,
+        outlet_temperature=config.AIR_TEMPERATURE_PREHEATED,
     )
 
-    print_mass_balance(
-        mass
-    )
-
-
-    # -----------------------------------------------------
-    # Electric air preheater
-    # -----------------------------------------------------
-
-    preheater = calculate_air_preheater(
-        mass["air"],
-        config.AIR_TEMPERATURE_PREHEATED,
-    )
-
-    print_air_preheater(
-        preheater
-    )
-
-
-    # -----------------------------------------------------
-    # Hybrid boiler comparison
-    # -----------------------------------------------------
-
-    comparison = solve_preheated_case(
-        energy["thermal_power_kw"],
-        methane,
-        config.AIR_TEMPERATURE_PREHEATED,
-    )
-
+    # --------------------------------------------------
+    # Comparison
+    # --------------------------------------------------
 
     print_comparison(
-        methane,
-        comparison,
+        reference,
+        hybrid,
     )
-
 
 
 if __name__ == "__main__":
     main()
+
